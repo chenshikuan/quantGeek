@@ -3,6 +3,13 @@ import sqlite3
 import threading
 
 
+
+def readsqlite(conn):
+    c=conn.cursor()
+    while(1):
+        c.execute("select * from T_stockTable")
+        alist=c.fetchall()
+        print("sun:"+str(len(alist)))
 conn = sqlite3.connect("file:memDB1?mode=memory&cache=shared", check_same_thread=False, uri=True)
 c = conn.cursor()
 c.execute('''CREATE TABLE T_stockTable(
@@ -43,5 +50,10 @@ c.execute('''CREATE TABLE T_stockTable(
 conn.commit()
 fpath="data/mktdt00.txt"
 
-
-cskCode.readData(fpath,conn)
+t1=threading.Thread(target=cskCode.readData,args=(fpath,conn))
+# cskCode.readData(fpath,conn)
+t2=threading.Thread(target=readsqlite,args=(conn,))
+t1.start()
+t2.start()
+t1.join()
+t2.join()
